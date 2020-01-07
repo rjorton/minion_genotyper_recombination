@@ -7,5 +7,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="Test123" />
+    <orderEntry type="module" module-name="StrainBuilder" />
+    <orderEntry type="module" module-name="SeqFeat" />
   </component>
 </module>

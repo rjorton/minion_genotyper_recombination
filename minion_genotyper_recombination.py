@@ -263,6 +263,17 @@ if arguments != 4:
     sys.exit(1)
 
 filename = sys.argv[1]
+
+file_stub_pos = filename.rfind(".txt")
+if file_stub_pos > 0:
+    file_stub = filename[:file_stub_pos]
+else:
+    file_stub = filename
+
+outfile_genotypes = file_stub + "_genotypes.txt"
+outfile_reads = file_stub + "_recomb_reads.txt"
+outfile_nomatch = file_stub + "_genotypes_nomatch.txt"
+
 strain1_name = sys.argv[2].upper()
 strain2_name = sys.argv[3].upper()
 
@@ -314,14 +325,21 @@ geno_codes = []
 for letter in range(len(strain1)):
     geno_codes.append([strain1[letter], strain2[letter], "-"])
 
+# itertools product to generate all combinations between the two strains, and the 3rd artificial gap strain
+# * asterisks used to unpack the list for the function call
 geno_list = list(product(*geno_codes))
 del geno_codes
 
 genotypes = []
 for geno in geno_list:
+    # Join all the elements if the geno list into a single string, the '' is the separator - empty for us
     genotypes.append(''.join(geno))
 
 del geno_list
+
+# Genotypes will contain duplicates if the strains share a code at any given position
+# So remove duplicates from genotypes
+genotypes = list(dict.fromkeys(genotypes))
 
 print("Total possible recombination codes (incl gaps) = " + str(len(genotypes)))
 
@@ -332,7 +350,7 @@ not_counts = {}
 not_found = 0
 seqs = []
 
-print("\nReading read code genotypes file")
+print("Reading read code genotypes file")
 with open(filename) as file_handler:
     reader = csv.reader(file_handler, delimiter='\t')
 
@@ -361,11 +379,11 @@ with open(filename) as file_handler:
             else:
                 not_counts[geno] += 1
 
-print("\nTotal seqs = " + str(geno_count))
+print("Total seqs = " + str(geno_count))
 print("Found in strain1/strain2 genotypes = " + str(geno_found))
 print("Not found in strain1/strain2 genotypes = " + str(not_found))
 
-print("\nSorting genotypes based on observed counts")
+print("Sorting genotypes based on observed counts")
 geno_sort_list = []
 for key, value in sorted(geno_counts.items(), key=lambda kv: kv[1], reverse=True):
     geno_sort_list.append([key, value])
@@ -378,75 +396,92 @@ for key, value in sorted(not_counts.items(), key=lambda kv: kv[1], reverse=True)
 # for key, value in sorted(geno_counts.items(), key=lambda kv: kv[1], reverse=True):
 #     print(key + "\t" + str(value))
 
+# Could do with a check of genotypes fully enclosed within another e.g. ---AN-- is part of --QAN-- etc
+
 del geno_counts
 del not_counts
 del genotypes
 
-print("Outputting genotype data")
-print("N\tCode\tCount\tRecombination")
+print("Outputting genotype data to: " + outfile_genotypes)
 
-geno_recomb = []
-recomb_count = 0
-recomb_sum = 0
-geno_count = 0
-strain1_sum = 0
-strain2_sum = 0
-unsure_sum = 0
+with open(outfile_genotypes, "w") as file_output:
+    file_output.write("N\tCode\tCount\tRecombination\n")
 
-# geno_sort_list: [0] genotype_code [1] count
-for geno in geno_sort_list:
-    geno_count += 1
-    s1 = 0
-    s2 = 0
+    geno_recomb = []
+    recomb_count = 0
+    recomb_sum = 0
+    geno_count = 0
+    strain1_sum = 0
+    strain2_sum = 0
+    unsure_sum = 0
 
-    for code in range(len(geno[0])):
-        if strain1[code] != strain2[code] and geno[0][code] != '-':
-            if geno[0][code] == strain1[code]:
-                s1 += 1
-            elif geno[0][code] == strain2[code]:
-                s2 += 1
+    # geno_sort_list: [0] genotype_code [1] count
+    for geno in geno_sort_list:
+        geno_count += 1
+        s1 = 0
+        s2 = 0
 
-    if s1 > 0 and s2 > 0:
-        recomb = "Recombinant"
-        recomb_count += 1
-        recomb_sum += geno[1]
-        geno_recomb.append(geno[0])
-    elif s1 > 0:
-        recomb = "Strain1"
-        strain1_sum += geno[1]
-    elif s2 > 0:
-        recomb = "Strain2"
-        strain2_sum += geno[1]
-    else:
-        recomb = "Strain1-or-Strain2"
-        unsure_sum += geno[1]
+        for code in range(len(geno[0])):
+            if strain1[code] != strain2[code] and geno[0][code] != '-':
+                if geno[0][code] == strain1[code]:
+                    s1 += 1
+                elif geno[0][code] == strain2[code]:
+                    s2 += 1
 
-    # print Number [1-N], genotype code, count, and recombination state
-    print(str(geno_count) + "\t" + geno[0] + "\t" + str(geno[1]) + "\t" + recomb)
+        if s1 > 0 and s2 > 0:
+            recomb = "Recombinant"
+            recomb_count += 1
+            recomb_sum += geno[1]
+            geno_recomb.append(geno[0])
+        elif s1 > 0:
+            # recomb = "Strain1-"
+            recomb = strain1_name
+            strain1_sum += geno[1]
+        elif s2 > 0:
+            # recomb = "Strain2"
+            recomb = strain2_name
+            strain2_sum += geno[1]
+        else:
+            # recomb = "Strain1-or-Strain2"
+            recomb = strain1_name + "-or-" + strain2_name
+            unsure_sum += geno[1]
 
-print("\nNumber of recombinant genotype codes = " + str(recomb_count))
+        # print Number [1-N], genotype code, count, and recombination state
+        file_output.write(str(geno_count) + "\t" + geno[0] + "\t" + str(geno[1]) + "\t" + recomb + "\n")
+
+print("Number of recombinant genotype codes = " + str(recomb_count))
 print("Total number of recombinant seqs = " + str(recomb_sum))
-print("Strain 1 seqs = " + str(strain1_sum))
-print("Strain 2 seqs  = " + str(strain2_sum))
+print("Strain1 [" + strain1_name + "] seqs = " + str(strain1_sum))
+print("Strain2 [" + strain2_name + "] seqs  = " + str(strain2_sum))
 print("Strain1-or-Strain2  seqs = " + str(unsure_sum))
 
-print("\nOutputting genotypes that didn't match strain1 or strain2")
-print("N\tCode\tCount")
-geno_count = 0
-for geno in not_sort_list:
-    geno_count += 1
-    print(str(geno_count) + "\t" + geno[0] + "\t" + str(geno[1]))
+print("Outputting recombinant reads to: " + outfile_reads)
 
-print("\nOutputting recombinant reads")
-print("N\tGenoN\tCode\tSeqName")
-geno_count = 0
-seq_count = 0
-for recomb in geno_recomb:
-    geno_count += 1
-    for seq in seqs:
-        if seq[0] == recomb:
-            seq_count += 1
-            print(str(seq_count) + "\t" + str(geno_count) + "\t" + seq[0] + "\t" + seq[1])
+with open(outfile_reads, "w") as file_output:
+    file_output.write("N\tGenoN\tCode\tSeqName\n")
+    geno_count = 0
+    seq_count = 0
+    for recomb in geno_recomb:
+        geno_count += 1
+        for seq in seqs:
+            if seq[0] == recomb:
+                seq_count += 1
+                file_output.write(str(seq_count) + "\t" + str(geno_count) + "\t" + seq[0] + "\t" + seq[1] + "\n")
+
+print("Outputting genotypes that didn't match strain1 or strain2 to: " + outfile_nomatch)
+
+with open(outfile_nomatch, "w") as file_output:
+    file_output.write("N\tCode\tCount\n")
+
+    geno_count = 0
+    geno_sum = 0
+    for geno in not_sort_list:
+        geno_count += 1
+        geno_sum += geno[1]
+        file_output.write(str(geno_count) + "\t" + geno[0] + "\t" + str(geno[1]) + "\n")
+
+    print("Total genotypes that do not match the strains = " + str(geno_count) + ", number of reads = " + str(geno_sum))
+
 
 # RL5A, 2488, 5819, -1
 # RL6, 5958, 6473, -1
