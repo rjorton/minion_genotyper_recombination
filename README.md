@@ -1,4 +1,4 @@
-###minion_genotyper_recombination.py
+### minion_genotyper_recombination.py
 
 Simple python script to detect recombination between two HCMV strains based on the output from [minion_Genotyper](https://github.com/salvocamiolo/minion_Genotyper). Usage:
 
