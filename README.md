@@ -1,8 +1,15 @@
-Simple python script to detect recombination between two HCMV strains.
+###minion_genotyper_recombination.py
+
+Simple python script to detect recombination between two HCMV strains based on the output from [minion_Genotyper](https://github.com/salvocamiolo/minion_Genotyper). Usage:
+
+---
+    python minion_genotyper_recombination.py read_codes.txt strain1 strain2
+---
+
 
 The script takes:
 
-Argument 1: The readCodes.txt file from minion_genotyper, which is in the following format:
+Argument 1: The readCodes.txt file from [minion_Genotyper](https://github.com/salvocamiolo/minion_Genotyper), which is in the following format:
 
 ---
     Read	GenotypeCode  
@@ -14,7 +21,8 @@ Argument 2: Strain1 [case insensitive]- either the name of the strain e.g. "merl
 
 Argument 3:  Strain2 [case insensitive] - either the name of the strain e.g. "af1" or the strain code e.g. "AHHHHAQVHLDRN"
 
-The script will then search through all the reads for any that show signatures of recombination between the two strain codes, and will output the following information to the screen and files:
+The script will then search through all the reads/readCodes for any that show signatures of recombination between the inputted two strain codes.
+It will output the following information to the screen when running, as well as three output files:
 
 ---
     minion_genotyper_recombination
@@ -59,7 +67,13 @@ The script will then search through all the reads for any that show signatures o
 
 The three output files are:
 
-File 1: _genotypes.txt - a summary of each genotype observed and the number of times it is observed. The genotypes in this file only relate to strains 1 or 2, or any recombinations between the 2
+File 1: _genotypes.txt - a summary of each genotype observed and the number of times it is observed.
+The genotypes in this file only relate to strains 1 or 2, or any recombinations between them. 
+The fields are N (the genotype number), 
+Code (the code observed in the read - this may be a truncated portion of the full genotype), 
+Count (the number of times this particular code is observed in the reads), 
+Recombination (whether the genotype is a recombinant or strain 1 or 2 genotype). 
+The file is sorted by the Count field so the most abundant genotypes are first.
 
 ---
     N	Code	Count	Recombination
@@ -69,7 +83,12 @@ File 1: _genotypes.txt - a summary of each genotype observed and the number of t
     4	----------YRN	16	Recombinant
 ---
 
-File 2: _recomb_reads.txt - the read ID's that display signatures of recombination
+File 2: _recomb_reads.txt - the read ID's that display signatures of recombination. 
+The fields are N (recombinant read number from 1 to N), 
+GenoN (recombinant genotype number from 1 to N), 
+Code (the recombinant genotype code), 
+SeqName (the sequence/read name). 
+The file is sorted so that the most abundant recombinant genotypes ae first in the file.
 
 ---
     N	GenoN	Code	SeqName
@@ -82,7 +101,12 @@ File 2: _recomb_reads.txt - the read ID's that display signatures of recombinati
     7	4	----------YR-	411a4dbb-3e07-49be-a1b1-68bd5353326a
 ---
 
-File 3: _genotypes_no_match.txt - a summary of each genotype observed and the number of times it is observed. The genotypes in this file are those not related to strains 1 or 2 (so presumably errorenous)
+File 3: _genotypes_no_match.txt - a summary of each genotype observed and the number of times it is observed. 
+The genotypes in this file are those not related to strains 1 or 2 (so presumably errors). 
+The fields are N (the genotype number), 
+Code (the code observed in the read), 
+Count (the number of times this particular code is observed in the reads).
+The file is sorted by the Count field so the most abundant genotypes are first.
 
 ---
     N	Code	Count
