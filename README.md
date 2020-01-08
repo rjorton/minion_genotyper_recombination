@@ -1,9 +1,9 @@
 ### minion_genotyper_recombination.py
 
-Simple python script to detect recombination between two HCMV strains based on the output from [minion_Genotyper](https://github.com/salvocamiolo/minion_Genotyper). Usage:
+Simple python script to detect recombination between two HCMV strains by analysing the output of [minion_Genotyper](https://github.com/salvocamiolo/minion_Genotyper). Usage:
 
 ---
-    python minion_genotyper_recombination.py read_codes.txt strain1 strain2
+    python minion_genotyper_recombination.py readCodes.txt strain1 strain2
 ---
 
 
@@ -88,7 +88,7 @@ The fields are N (recombinant read number from 1 to N),
 GenoN (recombinant genotype number from 1 to N), 
 Code (the recombinant genotype code), 
 SeqName (the sequence/read name). 
-The file is sorted so that the most abundant recombinant genotypes ae first in the file.
+The file is sorted so that the most abundant recombinant genotypes are first in the file.
 
 ---
     N	GenoN	Code	SeqName
@@ -116,3 +116,7 @@ The file is sorted by the Count field so the most abundant genotypes are first.
     4	--M----------	61
     5	--T----------	58
 ---
+
+The strain_codes.txt has a list of the 244 HCMV strains, their names and genotype codes. 
+The create_strain_dict.py script is a simple script to create the hard-code for the strain dictionary. 
+Neither of these two files are needed for minion_genotyper_recombination.py to run, they are just placed here for completeness.
