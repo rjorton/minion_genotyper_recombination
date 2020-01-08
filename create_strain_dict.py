@@ -3,7 +3,7 @@
 # create code that can be pasted in
 import csv
 
-filename = "/Users/richardorton/Downloads/depositedSequences_codes.txt"
+filename = "./strain_codes.txt"
 strain_dict = {}
 row_count = 0
 
@@ -15,7 +15,7 @@ with open(filename) as file_handler:
     for row in reader:
         row_count += 1
 
-        if(row_count > 1):
+        if row_count > 1:
             print(",\n\t\t\t\t", end='')
 
         print("\"" + row[0].upper() + "\": \"" + row[1].upper() + "\"", end='')
