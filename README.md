@@ -17,9 +17,9 @@ Argument 1: The readCodes.txt file from [minion_Genotyper](https://github.com/sa
     c1ffed12-2c0a-4d6c-9c6f-9f3266139439	---HH--------
     e2b1b440-8b05-4ffa-af0a-8779f0486999	--------HL---
 ---
-Argument 2: Strain1 [case insensitive]- either the name of the strain e.g. "merlin" or the strain code e.g. "AANNNHACIPYHD"
+Argument 2:  Strain2 [case insensitive] - either the name of the strain e.g. "af1" or the strain code e.g. "AHHHHAQVHLDRN"
 
-Argument 3:  Strain2 [case insensitive] - either the name of the strain e.g. "af1" or the strain code e.g. "AHHHHAQVHLDRN"
+Argument 3: Strain1 [case insensitive]- either the name of the strain e.g. "merlin" or the strain code e.g. "AANNNHACIPYHD"
 
 The script will then search through all the reads/readCodes for any that show signatures of recombination between the inputted two strain codes.
 It will output the following information to the screen when running, as well as three output files:
